@@ -1,0 +1,13 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+icon: ./deta_icon.png
+micros:
+  - name: passmng
+    src: ./
+    engine: svelte-kit
+    primary: true
+    dev: yarn dev
+    presets:
+      env:
+        - name: VITE_MICRO_KEY
+          description: Your project's data key.
