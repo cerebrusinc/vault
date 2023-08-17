@@ -9,5 +9,5 @@ micros:
     dev: yarn dev
     presets:
       env:
-        - name: VITE_MICRO_KEY
+        - name: VITE_PUBLIC_MICRO_KEY
           description: Your project's data key.

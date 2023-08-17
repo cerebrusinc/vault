@@ -1,6 +1,7 @@
 import { Deta } from "deta";
+import { envVars } from "./interfaces";
 
-const deta = Deta(import.meta.env.VITE_MICRO_KEY);
+const deta = Deta(envVars.dataKey);
 
 const db = deta.Base("passmanager");
 
