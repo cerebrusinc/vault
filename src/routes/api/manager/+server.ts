@@ -1,31 +1,7 @@
-import { Deta } from "deta";
-import { envVars } from "./interfaces";
+import { json } from "@sveltejs/kit";
+import { db } from "$lib/server/deta";
 
-const deta = Deta(envVars.dataKey);
-
-const db = deta.Base("passmanager");
-
-export const authorise = async (pin: string): Promise<boolean> => {
-	try {
-		const res = await db.get("access_pin");
-		if (res) {
-			const { pin: dbPin } = res;
-
-			if (pin === dbPin) return true;
-			else return false;
-		} else {
-			const set = await db.insert({ pin }, "access_pin");
-
-			if (set) return true;
-			else return false;
-		}
-	} catch (ex) {
-		console.log(`$lib/db authroise error:\n${ex}`);
-		return false;
-	}
-};
-
-export interface Password {
+interface Password {
 	key: string;
 	id: string;
 	link: string;
@@ -35,7 +11,8 @@ export interface Password {
 	index?: number;
 }
 
-export const getAllPasses = async (): Promise<Password[]> => {
+export const GET = async () => {
+	// get all passwords
 	try {
 		const res = await db.fetch();
 
@@ -69,16 +46,17 @@ export const getAllPasses = async (): Promise<Password[]> => {
 				});
 		});
 
-		return returnArr;
+		return json({ data: returnArr });
 	} catch (ex) {
 		console.log(`$lib/db getAllPasses error:\n${ex}`);
-		return [];
+		return json({ data: [] });
 	}
 };
 
-export const addPassword = async (passData: Password): Promise<boolean> => {
+export const PUT = async ({ params, request, cookies }) => {
+	//add password
+	const { link, password, service, username, id } = await request.json();
 	try {
-		const { link, password, service, username, id } = passData;
 		const res = await db.put({
 			link,
 			password,
@@ -87,17 +65,18 @@ export const addPassword = async (passData: Password): Promise<boolean> => {
 			id,
 		});
 
-		if (res) return true;
-		return false;
+		if (res) return json({ success: true });
+		return json({ success: false });
 	} catch (ex) {
 		console.log(`$lib/db addPassword error:\n${ex}`);
-		return false;
+		return json({ success: false });
 	}
 };
 
-export const patchPassword = async (passData: Password): Promise<boolean> => {
+export const PATCH = async ({ params, request, cookies }) => {
+	//edit password
+	const { link, password, service, username, key } = await request.json();
 	try {
-		const { link, password, service, username, key } = passData;
 		const res = await db.update(
 			{
 				link,
@@ -108,19 +87,21 @@ export const patchPassword = async (passData: Password): Promise<boolean> => {
 			key
 		);
 
-		return true;
+		return json({ success: true });
 	} catch (ex) {
 		console.log(`$lib/db addPassword error:\n${ex}`);
-		return false;
+		return json({ success: false });
 	}
 };
 
-export const delPassword = async (key: string): Promise<boolean> => {
+export const POST = async ({ params, request, cookies }) => {
+	//delete a password
+	const { key }: { key: string } = await request.json();
 	try {
 		const res = await db.delete(key);
-		return true;
+		return json({ success: true });
 	} catch (ex) {
 		console.log(`$lib/db delPassword error:\n${ex}`);
-		return false;
+		return json({ success: false });
 	}
 };

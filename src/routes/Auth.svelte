@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { authorise } from "$lib/db";
 	import { authPin, authed } from "./stores";
 
 	import { PasswordInput, Loading } from "carbon-components-svelte";
@@ -27,9 +26,17 @@
 		invalid = false;
 		isLoading = true;
 		try {
-			const res = await authorise(authPinValue);
+			const req = await fetch("/api/auth", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ pin: authPinValue }),
+			});
 
-			if (!res) warn = true;
+			const { success } = await req.json();
+
+			if (!success) warn = true;
 			disabled = false;
 			isLoading = false;
 			authed.update(() => true);

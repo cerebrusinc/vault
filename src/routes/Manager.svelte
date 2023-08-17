@@ -1,14 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import isURI from "@stdlib/assert-is-uri";
-	import {
-		getAllPasses,
-		addPassword,
-		delPassword,
-		patchPassword,
-		type Password,
-	} from "$lib/db";
-	import type { ModalInstruction } from "$lib/interfaces";
+	import type { ModalInstruction, Password } from "$lib/interfaces";
 	import { genPass } from "$lib/others";
 	import {
 		DataTableSkeleton,
@@ -112,20 +105,32 @@
 		buttonText = "Adding...";
 		isDisabled = true;
 		try {
-			const res = await addPassword({
-				id: Date.now().toString(),
-				key: "",
-				link: linkValue,
-				password: passValue,
-				service: serviceValue,
-				username: usernameValue,
-				index: -1,
+			const req = await fetch("/api/manager", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					id: Date.now().toString(),
+					link: linkValue,
+					password: passValue,
+					service: serviceValue,
+					username: usernameValue,
+				}),
 			});
 
-			if (res) {
-				const res2 = await getAllPasses();
+			const { success } = await req.json();
+
+			if (success) {
+				const req2 = await fetch("/api/manager", {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+					},
+				});
+				const { data } = await req2.json();
 				open = false;
-				dataLoaded = [...res2];
+				dataLoaded = [...data];
 				_alert(
 					"success",
 					"Data Added",
@@ -134,13 +139,13 @@
 				isDisabled = false;
 			} else {
 				isDisabled = false;
+				buttonText = "Add to Vault";
 				_alert("error", "Error", "Try again in a few minutes.");
-				buttonTextTwo = "Add to Vault";
 			}
 		} catch {
 			isDisabled = false;
-			_alert("error", "Server Error", "Try again in a few minutes.");
 			buttonText = "Add to Vault";
+			_alert("error", "Server Error", "Try again in a few minutes.");
 		}
 	};
 
@@ -176,19 +181,33 @@
 			if (modalHelper && dataLoaded) {
 				const { key, link, password, service, username } =
 					dataLoaded[modalHelper.id];
-				const res = await patchPassword({
-					id: "",
-					key,
-					link: linkValue === "" ? link : linkValue,
-					password: passValue === "" ? password : passValue,
-					service: serviceValue === "" ? service : serviceValue,
-					username: usernameValue === "" ? username : usernameValue,
+
+				const req = await fetch("/api/manager", {
+					method: "PATCH",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						key,
+						link: linkValue === "" ? link : linkValue,
+						password: passValue === "" ? password : passValue,
+						service: serviceValue === "" ? service : serviceValue,
+						username: usernameValue === "" ? username : usernameValue,
+					}),
 				});
 
-				if (res) {
-					const res2 = await getAllPasses();
+				const { success } = await req.json();
+
+				if (success) {
+					const req2 = await fetch("/api/manager", {
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					});
+					const { data } = await req2.json();
 					open = false;
-					dataLoaded = [...res2];
+					dataLoaded = [...data];
 					_alert("success", "Vault Updated", "Your Vault is up to date!");
 					isDisabled = false;
 				} else {
@@ -223,14 +242,29 @@
 			isDisabled = true;
 			const { key } = dataLoaded[modalHelper.id];
 			try {
-				const res = await delPassword(key);
+				const req = await fetch("/api/manager", {
+					method: "POST",
 
-				if (res) {
-					const res2 = await getAllPasses();
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ key }),
+				});
+
+				const { success } = await req.json();
+
+				if (success) {
+					const req2 = await fetch("/api/manager", {
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					});
+					const { data } = await req2.json();
 
 					isDisabled = false;
 					open = false;
-					dataLoaded = [...res2];
+					dataLoaded = [...data];
 					_alert("success", "Data Deleted", "You now have some free space!");
 				} else {
 					isDisabled = false;
@@ -277,8 +311,15 @@
 	};
 
 	onMount(async () => {
-		const res = await getAllPasses();
-		dataLoaded = [...res];
+		const req2 = await fetch("/api/manager", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		const { data } = await req2.json();
+		open = false;
+		dataLoaded = [...data];
 	});
 </script>
 

@@ -4,6 +4,12 @@ export interface ModalInstruction {
 	heading: string;
 }
 
-export const envVars = {
-	dataKey: import.meta.env.VITE_PUBLIC_MICRO_KEY,
-};
+export interface Password {
+	key: string;
+	id: string;
+	link: string;
+	password: string;
+	service: string;
+	username: string;
+	index?: number;
+}
