@@ -2,7 +2,7 @@
 v: 0
 icon: ./deta_icon.png
 micros:
-  - name: passmng
+  - name: Vault
     src: ./
     engine: svelte-kit
     primary: true
