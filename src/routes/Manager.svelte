@@ -136,6 +136,8 @@
 					"Data Added",
 					"A new password has been added to your Vault."
 				);
+
+				buttonText = "Add to Vault";
 				isDisabled = false;
 			} else {
 				isDisabled = false;
@@ -209,6 +211,7 @@
 					open = false;
 					dataLoaded = [...data];
 					_alert("success", "Vault Updated", "Your Vault is up to date!");
+					buttonTextTwo = "Add to Vault";
 					isDisabled = false;
 				} else {
 					isDisabled = false;
@@ -450,7 +453,7 @@
 		rows={dataLoaded}
 		{page}
 		{pageSize}
-		style="width: 100%"
+		style="width: 100%; height: 94%;"
 	>
 		<Toolbar>
 			<ToolbarContent>
